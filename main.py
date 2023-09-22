@@ -17,7 +17,5 @@ def get_userDataDevice():
 def send_userDataDevice(payLoad: dict = Body(...)):
     print(payLoad['device '])
     return {
-        "status":"Send successfuly",
-        "device" : "Desktop",
-        "platform": "Windows"
+        "Send successfuly",
     }
