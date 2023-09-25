@@ -4,6 +4,7 @@ from sqlalchemy import Integer, String
 from sqlalchemy.sql.sqltypes import TIMESTAMP
 from sqlalchemy.sql.expression import text
 
+# database table look
 class Track(Base):
     __tablename__ = 'tests'
     

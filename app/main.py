@@ -1,14 +1,12 @@
 from fastapi import FastAPI, Response, status
 from fastapi import HTTPException
 from fastapi.params import Body
-from pydantic import BaseModel
 from typing import Optional
 from random import randrange
 import psycopg2
 from psycopg2.extras import RealDictCursor
 
-
-from . import models
+from . import models, schemas
 from .database import engine,get_db
 from sqlalchemy.orm import Session
 from fastapi import Depends
@@ -17,10 +15,6 @@ models.Base.metadata.create_all(bind=engine)
 
 app = FastAPI()
 
-class Track(BaseModel):
-    device: str
-    platform: str
-    language: str
 
 @app.get("/")
 async def root():
@@ -32,7 +26,7 @@ def get_tracks(db: Session=Depends(get_db)):
     return {"[*] Tracks:": tracks}
 
 @app.post("/tracks", status_code=status.HTTP_201_CREATED)
-def create_tracks(track: Track, db: Session=Depends(get_db)):
+def create_tracks(track: schemas.CreateTrack, db: Session=Depends(get_db)):
     new_track = models.Track(**track.dict())
     db.add(new_track)
     db.commit()
@@ -65,7 +59,7 @@ def delete_track(id:int, db: Session=Depends(get_db)):
     return Response(status_code=status.HTTP_204_NO_CONTENT)
 
 @app.put("/tracks/{id}")
-def update_track(id:int, track:Track, db: Session=Depends(get_db)):
+def update_track(id:int, track: schemas.CreateTrack, db: Session=Depends(get_db)):
     
     track_query = db.query(models.Track).filter(models.Track.id == id)
     track_to_update = track_query.first()
