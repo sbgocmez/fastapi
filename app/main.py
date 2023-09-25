@@ -8,152 +8,73 @@ import psycopg2
 from psycopg2.extras import RealDictCursor
 
 
+from . import models
+from .database import engine,get_db
+from sqlalchemy.orm import Session
+from fastapi import Depends
+
+models.Base.metadata.create_all(bind=engine)
+
 app = FastAPI()
 
-
-class Post(BaseModel):
-    title: str 
-    content: str
-    published: bool = True
-    rating: Optional[int] = None
-    
 class Track(BaseModel):
     device: str
     platform: str
-    timestamp: str
     language: str
-    
 
-# burayi while a almayi dusunebiliriz
-try:
-    conn = psycopg2.connect(host='localhost', database='fastapi', user='postgres', password='busra123', cursor_factory=RealDictCursor)
-    cursor = conn.cursor()
-    
-    print("Database connection is succesful!")
-except Exception as dbConnectionError:
-    print("Connecting to database was failed.")
-    print(dbConnectionError)
-    #time.sleep(3)
-
-
-my_posts = [{"title": "title of 1 ", "content":"content of p", "id":1}]
-# path operation
-# function and decorator
 @app.get("/")
 async def root():
     return {"message": "Hello World"}
 
 @app.get("/tracks")
-def get_tracks():
-    cursor.execute("""SELECT * FROM public."Tracks" """)
-    tracks = cursor.fetchall()
-    print(tracks)
-    return {"device data": tracks}
+def get_tracks(db: Session=Depends(get_db)):
+    tracks = db.query(models.Track).all()
+    return {"[*] Tracks:": tracks}
 
 @app.post("/tracks", status_code=status.HTTP_201_CREATED)
-def create_tracks(track: Track):
-    variables = (track.device, track.platform, track.timestamp, track.language)
-    print(variables)
-    cursor.execute("""INSERT INTO public."Tracks" (device, platform, timestamp, language) VALUES (%s, %s, %s, %s) RETURNING *""", (track.device, track.platform, track.timestamp, track.language))
-    new_track = cursor.fetchone()
-    conn.commit()
-    return {"added": new_track}
+def create_tracks(track: Track, db: Session=Depends(get_db)):
+    new_track = models.Track(**track.dict())
+    db.add(new_track)
+    db.commit()
+    db.refresh(new_track)
+    
+    return {"[*] Created track": new_track}
 
 @app.get("/tracks/{id}")
-def get_one_track(id):
-    cursor.execute("""SELECt * FROM public."Tracks" where id = %s""", (id,))
-    track = cursor.fetchone()
+def get_track(id:int, db: Session=Depends(get_db)):
+    track = db.query(models.Track).filter(models.Track.id == id).first()
     
     if not track:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Not found id ")
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Not found id {id}")
     
-    return(track)
-    
+    return {f"[*] Track with id {id}":track}
+
 
 @app.delete("/tracks/{id}", status_code=status.HTTP_204_NO_CONTENT)
-def delete_track(id:int):
-    cursor.execute("""DELETE FROM public."Tracks" WHERE id=%s returning *""", (str(id)))
-    deleted_track = cursor.fetchone()
-    conn.commit()
+def delete_track(id:int, db: Session=Depends(get_db)):
+    track_query = db.query(models.Track).filter(models.Track.id == id)
     
-    if deleted_track == None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Not found id ")
-    return({"data ": "deleted_track"})
-
-
-@app.put("/tracks/{id}")
-def update_track(id:int, track:Track):
-    cursor.execute("""UPDATE public."Tracks" SET device= %s, platform=%s, timestamp=%s, language =%s WHERE id=%s returning *""", (track.device, track.platform, track.timestamp, track.language, str(id)))
+    track = track_query.first()
     
-    updated_track = cursor.fetchone()
-    conn.commit()
+    if track == None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Not found id {id}")
     
-    if updated_track == None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Not found id to update")
-    return({"data ": updated_track})
-
-@app.post("/devices")
-def send_userDataDevice(payLoad: dict = Body(...)):
+    track_query.delete(synchronize_session=False)
+    db.commit()
     
-    print(payLoad['device'])
-    return {
-        "Send successfuly",
-    }
-    
-@app.get("/posts")
-def get_posts():
-    return {"data":my_posts}
-
-
-@app.post("/posts", status_code = status.HTTP_201_CREATED)
-def send_posts(new_post: Post):
-    post_dict = new_post.dict()
-    post_dict['id'] = randrange(0,10000)
-    my_posts.append(post_dict)
-    return {"data: " : post_dict}
-
-def find_by_id(id):
-    for i in range(len(my_posts)):
-        if (my_posts[i]['id'] == id):
-            return my_posts[i]
-
-@app.get("/posts/{id}")
-def get_post(id: int):
-    print(int(id))
-    post = find_by_id(id)
-    if not post:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Not found id ")
-        # response.status_code = status.HTTP_404_NOT_FOUND
-        # return {f'post with id {id} not found'}
-    return {"data": find_by_id(id)}
-
-
-def find_index_post(id):
-    for i in range(len(my_posts)):
-        if my_posts[i]['id'] == id:
-            return i
-
-@app.delete('/posts/{id}', status_code=status.HTTP_204_NO_CONTENT)
-def delete_post(id:int):
-    index = find_index_post(id)
-    
-    if index < 0:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Not found id ")
-    my_posts.pop(index)
     return Response(status_code=status.HTTP_204_NO_CONTENT)
 
-
-@app.put("/posts/{id}")
-def update_post(id: int, post: Post):
-    index = find_index_post(id)
-    print(index)
-    print(index)
-    if index < 0:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Not found id ")
+@app.put("/tracks/{id}")
+def update_track(id:int, track:Track, db: Session=Depends(get_db)):
     
-    post_dict = post.dict()
-    post_dict['id'] = id
-    my_posts[index] = post_dict
-    print(post)
-    return {'message: ': post_dict}
-
+    track_query = db.query(models.Track).filter(models.Track.id == id)
+    track_to_update = track_query.first()
+    
+    if track_to_update == None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Not found id to update")
+    
+    track_query.update(track.dict(), synchronize_session=False)
+    db.commit()
+    
+    track_to_update = track_query.first()
+    return {f"[*] Updated track with id {id}": track_to_update}
