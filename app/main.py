@@ -80,6 +80,18 @@ def delete_track(id:int):
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Not found id ")
     return({"data ": "deleted_track"})
 
+
+@app.put("/tracks/{id}")
+def update_track(id:int, track:Track):
+    cursor.execute("""UPDATE public."Tracks" SET device= %s, platform=%s, timestamp=%s, language =%s WHERE id=%s returning *""", (track.device, track.platform, track.timestamp, track.language, str(id)))
+    
+    updated_track = cursor.fetchone()
+    conn.commit()
+    
+    if updated_track == None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Not found id to update")
+    return({"data ": updated_track})
+
 @app.post("/devices")
 def send_userDataDevice(payLoad: dict = Body(...)):
     
