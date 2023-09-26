@@ -9,7 +9,6 @@ from typing import List
 from fastapi import APIRouter
 
 router = APIRouter(
-    prefix="/clients",
     tags=['Clients']
 )
 
@@ -18,8 +17,12 @@ router = APIRouter(
 def get_clients(request: Request, db: Session=Depends(get_db)):
     clients = db.query(clientModel.Client).all()
     return clients
+@router.get("/", response_model=List[clientSchema.ClientResponse])
+def get_clients(request: Request, db: Session=Depends(get_db)):
+    clients = db.query(clientModel.Client).all()
+    return clients
 
-@router.post("/", status_code=status.HTTP_201_CREATED, response_model=clientSchema.ClientResponse)
+@router.post("/clients", status_code=status.HTTP_201_CREATED, response_model=clientSchema.ClientResponse)
 def create_client(request: Request, client: clientSchema.CreateClient, db: Session=Depends(get_db)):
     client.address = request.client.host
     new_client = clientModel.Client(**client.dict())
@@ -29,7 +32,7 @@ def create_client(request: Request, client: clientSchema.CreateClient, db: Sessi
     
     return new_client
 
-@router.get("/{id}", response_model=clientSchema.ClientResponse)
+@router.get("/clients/{id}", response_model=clientSchema.ClientResponse)
 def get_client(id:int, db: Session=Depends(get_db)):
     client = db.query(clientModel.Client).filter(clientModel.Client.id == id).first()
     
