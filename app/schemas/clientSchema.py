@@ -5,9 +5,9 @@ from fastapi.params import Optional
 ### requests
 
 class ClientBase(BaseModel):
-    device: str
-    platform: str
-    language: str
+    device: Optional[str] = 'default'
+    platform: Optional[str] = 'def platform'
+    language: Optional[str] = 'def language'
     
 class ClientResponse(ClientBase):
     id: int
