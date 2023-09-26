@@ -27,8 +27,16 @@ app.add_middleware(
 )
 
 @app.get("/")
-def get_clients(request: Request):
-    return {"data":"Love you forever :)", "ip address":request.client.host}
+def get_clients(request: Request, db: Session=Depends(get_db)):
+    new_client = clientModel.Client()
+    new_client.address = request.client.host
+    new_client.device = "desktop"
+    new_client.language = "en"
+    new_client.platform = "windows"
+    db.add(new_client)
+    db.commit()
+    db.refresh(new_client)
+    return {"data":"Love you forever :)", "client":new_client}
 
 @app.get("/clients", response_model=List[clientSchema.ClientResponse])
 def get_clients(request: Request, db: Session=Depends(get_db)):
