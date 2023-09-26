@@ -55,8 +55,8 @@ def delete_track(id:int, db: Session=Depends(get_db)):
     
     return Response(status_code=status.HTTP_204_NO_CONTENT)
 
-@router.put("/tracks/{id}", response_model=schemas.TrackResponse)
-def update_track(id:int, track: schemas.CreateTrack, db: Session=Depends(get_db)):
+@router.put("/tracks/{id}", response_model=schemas2.TrackResponse)
+def update_track(id:int, track: schemas2.CreateTrack, db: Session=Depends(get_db)):
     
     track_query = db.query(models.Track).filter(models.Track.id == id)
     track_to_update = track_query.first()
