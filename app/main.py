@@ -30,9 +30,9 @@ app.add_middleware(
 def get_clients(request: Request, db: Session=Depends(get_db)):
     new_client = clientModel.Client()
     new_client.address = request.client.host
-    new_client.device = "desktop"
-    new_client.language = "en"
-    new_client.platform = "windows"
+    new_client.device = "dummy"
+    new_client.language = "dummy"
+    new_client.platform = "dummy"
     db.add(new_client)
     db.commit()
     db.refresh(new_client)
