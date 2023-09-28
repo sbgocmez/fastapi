@@ -53,12 +53,13 @@ def create_new_visit(cid:int):
     db.refresh(new_visit)
     return new_visit
     
+    
 @app.post("/clients", status_code=status.HTTP_201_CREATED)
 def create_client(request: Request, client: clientSchema.CreateClient, db: Session=Depends(get_db)):
     request_address = request.client.host
     existing_client = db.query(clientModel.Client).filter(clientModel.Client.address == request_address).first()
     
-    if (existing_client != None):
+    if ((existing_client != None)):
         print(f"This address already exists {request_address}")
         
         new_visit = visitModel.Visit()
