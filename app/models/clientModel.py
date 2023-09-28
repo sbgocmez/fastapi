@@ -3,7 +3,7 @@ from sqlalchemy import Column
 from sqlalchemy import Integer, String
 from sqlalchemy.sql.sqltypes import TIMESTAMP
 from sqlalchemy.sql.expression import text
-import pymysql
+#import pymysql
 
 class Client(Base):
     __tablename__ = "Clients"
