@@ -3,6 +3,7 @@ from sqlalchemy import Column
 from sqlalchemy import Integer, ForeignKey
 from sqlalchemy.sql.sqltypes import TIMESTAMP
 from sqlalchemy.sql.expression import text
+import pymysql
 
 class Visit(Base):
     __tablename__ = "Visits"

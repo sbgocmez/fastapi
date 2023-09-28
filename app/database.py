@@ -1,6 +1,7 @@
 from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
+import pymysql
 
 # SQLALCHEMY_DATABASE_URL = "postgresql://postgres:busra123@localhost/fastapi"
 
@@ -16,7 +17,7 @@ db_name = "mydatabase"
 db_password = "busra123"
 
 # Create the SQLAlchemy database URL
-db_url = f"mysql+PyMySQL://{db_username}:{db_password}@{db_endpoint}:{db_port}/{db_name}"
+db_url = f"mysql+pymysql://{db_username}:{db_password}@{db_endpoint}:{db_port}/{db_name}"
 
 SQLALCHEMY_DATABASE_URL = db_url
 # 'postgresql://<username>:<password>@ip-address/hostname/<databasename>'
