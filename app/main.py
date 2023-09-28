@@ -43,23 +43,53 @@ def get_clients(request: Request, db: Session=Depends(get_db)):
     clients = db.query(clientModel.Client).all()
     return clients
 
-@app.post("/clients", status_code=status.HTTP_201_CREATED, response_model=clientSchema.ClientResponse)
+
+def create_new_visit(cid:int):
+    new_visit = visitModel.Visit()
+    new_visit.client_id = cid
+    
+    db.add(new_visit)
+    db.commit()
+    db.refresh(new_visit)
+    return new_visit
+    
+@app.post("/clients", status_code=status.HTTP_201_CREATED)
 def create_client(request: Request, client: clientSchema.CreateClient, db: Session=Depends(get_db)):
     request_address = request.client.host
-    if_exists = db.query(clientModel.Client).filter(clientModel.Client.address == address).first()
+    existing_client = db.query(clientModel.Client).filter(clientModel.Client.address == request_address).first()
     
-    if (if_exists != None):
-        console.log(f"This address already exists {request_address}")
+    if (existing_client != None):
+        print(f"This address already exists {request_address}")
+        
+        new_visit = visitModel.Visit()
+        new_visit.client_id = existing_client.id
+        
+        db.add(new_visit)
+        db.commit()
+        db.refresh(new_visit)
+    
+        existing_client.created_at = new_visit.created_at
+        db.commit()
+        
+        #last_visit = create_new_visit(existing_client.id)
+        
+        print(f"last visit for ip: {request_address} is at {new_visit.created_at}")
     else:
-        console.log(f"This address does not exists in db {request_address}")
+        print(f"This address does not exists in db {request_address}")
+        client.address = request_address
+        new_client = clientModel.Client(**client.dict())
+        db.add(new_client)
+        db.commit()
+        db.refresh(new_client)
+        
+        new_visit = visitModel.Visit()
+        new_visit.client_id = new_client.address
+        
+        db.add(new_visit)
+        db.commit()
+        db.refresh(new_visit)
     
-    client.address = request_address
-    new_client = clientModel.Client(**client.dict())
-    db.add(new_client)
-    db.commit()
-    db.refresh(new_client)
-    
-    return new_client
+    return {"new_":new_visit}
 
 @app.get("/clients/{id}", response_model=clientSchema.ClientResponse)
 def get_client(id:int, db: Session=Depends(get_db)):
