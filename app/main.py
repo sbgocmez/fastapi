@@ -57,18 +57,18 @@ def create_new_visit(cid:int):
 @app.post("/clients", status_code=status.HTTP_201_CREATED)
 def create_client(request: Request, client: clientSchema.CreateClient, db: Session=Depends(get_db)):
     
-    if client.platform == "iOS" or client.platform == "MacOS" :
-        new_client = visitModel.Client()
-        new_client.address = "0.0.0.0"
-        new_client.platform = "ios/macos"
-        new_client.language = "--"
-        new_client.device = "iphone/macos"
+    # if client.platform == "iOS" or client.platform == "MacOS" :
+    #     new_client = visitModel.Client()
+    #     new_client.address = "0.0.0.0"
+    #     new_client.platform = "ios/macos"
+    #     new_client.language = "--"
+    #     new_client.device = "iphone/macos"
         
-        db.add(new_client)
-        db.commit()
-        db.refresh(new_client)
+    #     db.add(new_client)
+    #     db.commit()
+    #     db.refresh(new_client)
         
-        return {"some osx device"}
+    #     return {"some osx device"}
     request_address = request.client.host
     existing_client = db.query(clientModel.Client).filter(clientModel.Client.address == request_address).first()
     
