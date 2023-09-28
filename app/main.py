@@ -45,7 +45,15 @@ def get_clients(request: Request, db: Session=Depends(get_db)):
 
 @app.post("/clients", status_code=status.HTTP_201_CREATED, response_model=clientSchema.ClientResponse)
 def create_client(request: Request, client: clientSchema.CreateClient, db: Session=Depends(get_db)):
-    client.address = request.client.host
+    request_address = request.client.host
+    if_exists = db.query(clientModel.Client).filter(clientModel.Client.address == address).first()
+    
+    if (if_exists != None):
+        console.log(f"This address already exists {request_address}")
+    else:
+        console.log(f"This address does not exists in db {request_address}")
+    
+    client.address = request_address
     new_client = clientModel.Client(**client.dict())
     db.add(new_client)
     db.commit()
