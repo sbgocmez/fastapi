@@ -64,9 +64,11 @@ def create_client(request: Request, client: clientSchema.CreateClient, db: Sessi
         new_client.language = "--"
         new_client.device = "iphone/macos"
         
-        db.add(new_visit)
+        db.add(new_client)
         db.commit()
-        db.refresh(new_visit)
+        db.refresh(new_client)
+        
+        return {"some osx device"}
     request_address = request.client.host
     existing_client = db.query(clientModel.Client).filter(clientModel.Client.address == request_address).first()
     
