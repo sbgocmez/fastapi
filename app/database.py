@@ -20,7 +20,7 @@ SQLALCHEMY_DATABASE_URL = "postgresql://wxdrjneihowrax:fd620896e4bec3696b5e48b8c
 # # Create the SQLAlchemy database URL
 # db_url = f"mysql+pymysql://{db_username}:{db_password}@{db_endpoint}:{db_port}/{db_name}"
 
-SQLALCHEMY_DATABASE_URL = db_url
+#SQLALCHEMY_DATABASE_URL = db_url
 # 'postgresql://<username>:<password>@ip-address/hostname/<databasename>'
 
 engine = create_engine(SQLALCHEMY_DATABASE_URL)
