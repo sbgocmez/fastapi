@@ -44,7 +44,7 @@ def get_clients(request: Request, db: Session=Depends(get_db)):
     return clients
 
 
-def create_new_visit(cid:int):
+def create_new_visit(cid:int, db: Session=Depends(get_db)):
     new_visit = visitModel.Visit()
     new_visit.client_id = cid
     
