@@ -6,7 +6,7 @@ from sqlalchemy.sql.expression import text
 #import pymysql
 
 class Client(Base):
-    __tablename__ = "Clients"
+    __tablename__ = "Clients2"
     id = Column(Integer, primary_key=True, nullable=False)
     address = Column(String(64), nullable=False)
     device = Column(String(32), nullable=False)

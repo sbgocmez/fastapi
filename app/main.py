@@ -11,6 +11,7 @@ from .database import engine, get_db
 from typing import List
 from .models import clientModel
 from .schemas import clientSchema
+from datetime import datetime, timezone
 
 clientModel.Base.metadata.create_all(bind=engine)
 visitModel.Base.metadata.create_all(bind=engine)
@@ -42,6 +43,11 @@ def get_clients(request: Request, db: Session=Depends(get_db)):
 def get_clients(request: Request, db: Session=Depends(get_db)):
     clients = db.query(clientModel.Client).all()
     return clients
+
+@app.get("/visits", response_model=List[clientSchema.VisitResponse])
+def get_visits(request: Request, db: Session=Depends(get_db)):
+    visits = db.query(visitModel.Visit).all()
+    return visits
 
 
 def create_new_visit(cid:int, db: Session=Depends(get_db)):
@@ -77,12 +83,22 @@ def create_client(request: Request, client: clientSchema.CreateClient, db: Sessi
         
         new_visit = visitModel.Visit()
         new_visit.client_id = existing_client.id
+        new_visit.created_at = datetime.now(timezone.utc)
         
+        print(new_visit.created_at)
         db.add(new_visit)
         db.commit()
         db.refresh(new_visit)
+        
+        print(new_visit.id)
+        print(f"NOO PROBLEM UNTIL THERE {request_address}")
     
         existing_client.created_at = new_visit.created_at
+        
+        print(f" 22222 NOO PROBLEM UNTIL THERE {request_address}") 
+        
+        print(new_visit.created_at)
+        
         db.commit()
         
         #last_visit = create_new_visit(existing_client.id)
@@ -113,3 +129,24 @@ def get_client(id:int, db: Session=Depends(get_db)):
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Not found id {id}")
     
     return client
+
+@app.get("/visits/{id}", response_model=clientSchema.VisitResponse)
+def get_visit(id:int, db: Session=Depends(get_db)):
+    visit = db.query(visitModel.Visit).filter(visitModel.Visit.id == id).first()
+    
+    if not visit:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Not found id {id}")
+    
+    return visit
+
+@app.get("/deletetables")
+def delete_all( db: Session=Depends(get_db)):
+    for i in range(1,14):
+        # stm = visitModel.Visit.rem.where(visitModel.Visit.id == i)
+        # db.execute(stm)
+        # db.commit()
+        
+        # # print(f" NOOOOOOOOO {i}")
+        vv = db.query(visitModel.Visit).filter(visitModel.Visit.id == i).first()
+        db.delete(vv)
+        db.commit()

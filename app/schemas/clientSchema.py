@@ -20,3 +20,12 @@ class ClientResponse(ClientBase):
 # should be fixed
 class CreateClient(ClientBase):
     address: Optional[str] = '.'
+    
+class VisitResponse(BaseModel):
+    id: int
+    created_at: datetime
+    client_id: int
+    
+    class Config:
+        from_orm = True
+
