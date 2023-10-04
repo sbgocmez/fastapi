@@ -141,14 +141,20 @@ def get_visit(id:int, db: Session=Depends(get_db)):
     
     return visit
 
-@app.get("/deletetables")
-def delete_all( db: Session=Depends(get_db)):
-    for i in range(1,14):
-        # stm = visitModel.Visit.rem.where(visitModel.Visit.id == i)
-        # db.execute(stm)
-        # db.commit()
+# @app.get("/deletetables")
+# def delete_all( db: Session=Depends(get_db)):
+#     for i in range(1,14):
+#         # stm = visitModel.Visit.rem.where(visitModel.Visit.id == i)
+#         # db.execute(stm)
+#         # db.commit()
         
-        # # print(f" NOOOOOOOOO {i}")
-        vv = db.query(visitModel.Visit).filter(visitModel.Visit.id == i).first()
-        db.delete(vv)
-        db.commit()
+#         # # print(f" NOOOOOOOOO {i}")
+#         vv = db.query(visitModel.Visit).filter(visitModel.Visit.id == i).first()
+#         db.delete(vv)
+#         db.commit()
+  
+@app.get('/analytics')      
+def make_analytics(db: Session=Depends(get_db)):
+    result = db.query(visitModel.Visit)
+    return result
+    
