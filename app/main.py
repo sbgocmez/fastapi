@@ -108,12 +108,14 @@ def create_client(request: Request, client: clientSchema.CreateClient, db: Sessi
         print(f"This address does not exists in db {request_address}")
         client.address = request_address
         new_client = clientModel.Client(**client.dict())
+        new_client
         db.add(new_client)
         db.commit()
         db.refresh(new_client)
         
         new_visit = visitModel.Visit()
         new_visit.client_id = new_client.address
+        new_visit.created_at = datetime.now(timezone.utc)
         
         db.add(new_visit)
         db.commit()
