@@ -155,6 +155,15 @@ def get_visit(id:int, db: Session=Depends(get_db)):
   
 @app.get('/analytics')      
 def make_analytics(db: Session=Depends(get_db)):
-    result = db.query(visitModel.Visit)
-    return result
+    clients = db.query(clientModel.Client).all()
+    my_data = []
+    for client in clients:
+        if (client.id != 4 and client.id !=5):
+            visit_list = db.query(visitModel.Visit).filter(visitModel.Visit.client_id == client.id).all()
+            number_of_visits = len(visit_list)
+            #print(datetime.now()-visit_list[0].created_at)
+            my_data.append({f"Client with IP address {client.address} visited the site {number_of_visits} time.\nClient platform {client.platform} and device {client.device}\nLast visit at {client.created_at}"})
+    for data in my_data:
+        print(data)
+    return my_data
     
