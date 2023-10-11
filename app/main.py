@@ -13,6 +13,11 @@ from .models import clientModel
 from .schemas import clientSchema
 from datetime import datetime, timezone
 
+from fastapi.templating import Jinja2Templates
+from fastapi.responses import HTMLResponse
+
+templates = Jinja2Templates(directory="app/templates")
+
 clientModel.Base.metadata.create_all(bind=engine)
 visitModel.Base.metadata.create_all(bind=engine)
 
@@ -114,7 +119,7 @@ def create_client(request: Request, client: clientSchema.CreateClient, db: Sessi
         db.refresh(new_client)
         
         new_visit = visitModel.Visit()
-        new_visit.client_id = new_client.address
+        new_visit.client_id = new_client.id
         new_visit.created_at = datetime.now(timezone.utc)
         
         db.add(new_visit)
@@ -157,13 +162,39 @@ def get_visit(id:int, db: Session=Depends(get_db)):
 def make_analytics(db: Session=Depends(get_db)):
     clients = db.query(clientModel.Client).all()
     my_data = []
+    client_data = []
+    
+    #client_data = [{"id": client.id, "name": client.name, "email": client.email} for client in clients]
     for client in clients:
-        if (client.id != 4 and client.id !=5):
+        if (client.id != 4 and client.id !=5): # dummy olarak ekledigim icin.
             visit_list = db.query(visitModel.Visit).filter(visitModel.Visit.client_id == client.id).all()
             number_of_visits = len(visit_list)
             #print(datetime.now()-visit_list[0].created_at)
+            formatted_date = client.created_at.strftime("%d.%m.%Y")
+            client_data.append({"id":client.id, "address":client.address, "device":client.device, "platform":client.platform, "last visiting time":formatted_date, "total visits":number_of_visits})
             my_data.append({f"Client with IP address {client.address} visited the site {number_of_visits} time.\nClient platform {client.platform} and device {client.device}\nLast visit at {client.created_at}"})
-    for data in my_data:
+    for data in client_data:
         print(data)
+    return my_data
+
+@app.get('/client-table', response_class=HTMLResponse)      
+def make_analytics(request: Request, db: Session=Depends(get_db)):
+    clients = db.query(clientModel.Client).all()
+    my_data = []
+    client_data = []
+    
+    #client_data = [{"id": client.id, "name": client.name, "email": client.email} for client in clients]
+    for client in clients:
+        if (client.id != 4 and client.id !=5): # dummy olarak ekledigim icin.
+            visit_list = db.query(visitModel.Visit).filter(visitModel.Visit.client_id == client.id).all()
+            number_of_visits = len(visit_list)
+            #print(datetime.now()-visit_list[0].created_at)
+            formatted_date = client.created_at.strftime("%d.%m.%Y")
+            client_data.append({"id":client.id, "address":client.address, "device":client.device, "platform":client.platform,"last_visiting_time":formatted_date, "total_visits":number_of_visits})
+            my_data.append({f"Client with IP address {client.address} visited the site {number_of_visits} time.\nClient platform {client.platform} and device {client.device}\nLast visit at {client.created_at}"})
+    for data in client_data:
+        print(data)
+        
+    return templates.TemplateResponse("client_table.html", {"request": request, "client_data": client_data})
     return my_data
     
