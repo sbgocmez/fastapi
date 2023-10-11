@@ -199,7 +199,7 @@ def make_analytics(request: Request, db: Session=Depends(get_db)):
 
 @app.get('/delete-some')
 def delete_some(db: Session=Depends(get_db)):
-    client = db.query(clientModel.Client).filter(clientModel.Client.id == 4).first()
+    client = db.query(clientModel.Client).filter(clientModel.Client.id == 9).first()
     #print(client.address)
     if client:
         # Print the address before deleting if needed
