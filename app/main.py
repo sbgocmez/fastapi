@@ -179,7 +179,7 @@ def make_analytics(db: Session=Depends(get_db)):
 
 @app.get('/client-table', response_class=HTMLResponse)      
 def make_analytics(request: Request, db: Session=Depends(get_db)):
-    clients = db.query(clientModel.Client).all().sort(clientModel.Client.id)
+    clients = db.query(clientModel.Client).all()
     my_data = []
     client_data = []
     
