@@ -185,7 +185,7 @@ def make_analytics(request: Request, db: Session=Depends(get_db)):
     
     #client_data = [{"id": client.id, "name": client.name, "email": client.email} for client in clients]
     for client in clients:
-        if (client.id != 4 and client.id !=5): # dummy olarak ekledigim icin.
+        if (True): # dummy olarak ekledigim icin.
             visit_list = db.query(visitModel.Visit).filter(visitModel.Visit.client_id == client.id).all()
             number_of_visits = len(visit_list)
             #print(datetime.now()-visit_list[0].created_at)
@@ -199,7 +199,7 @@ def make_analytics(request: Request, db: Session=Depends(get_db)):
 
 @app.get('/delete-some')
 def delete_some(db: Session=Depends(get_db)):
-    client = db.query(clientModel.Client).filter(clientModel.Client.id == 9).first()
+    client = db.query(clientModel.Client).filter(clientModel.Client.id == 7).first()
     #print(client.address)
     if client:
         # Print the address before deleting if needed
