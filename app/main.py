@@ -179,7 +179,7 @@ def make_analytics(db: Session=Depends(get_db)):
 
 @app.get('/client-table', response_class=HTMLResponse)      
 def make_analytics(request: Request, db: Session=Depends(get_db)):
-    clients = db.query(clientModel.Client).all()
+    clients = db.query(clientModel.Client).all().sort(id)
     my_data = []
     client_data = []
     
@@ -202,16 +202,11 @@ def delete_some(db: Session=Depends(get_db)):
     client = db.query(clientModel.Client).filter(clientModel.Client.id == 5).first()
     #print(client.address)
     if client:
-        # Print the address before deleting if needed
         print(client.address)
-    
-        # Delete the client from the database
         db.delete(client)
-    
-    # Commit the changes to the database
         db.commit()
     else:
-        print("Client with id 1 not found")
+        print("Client with id not found")
     #db.query(clientModel.Client).delete(client)
     db.commit()
     #db.refresh()
